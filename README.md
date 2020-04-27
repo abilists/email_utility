@@ -1,13 +1,9 @@
-Utility_email
-==============
+# email_utility library for <a href="http://www.abilists.com" ><img src="https://github.com/abilists/abilists_client/blob/master/src/main/webapp/static/apps/img/abilists/logo01.png" height="22" alt="Abilists"></a>
 
-\[ [About](https://github.com/minziappa/utility)• [Blog](http://njoonk.blogspot.jp/) \]
+[![Build Status](https://travis-ci.org/abilists/email_utility.svg?branch=master)](https://travis-ci.org/abilists/email_utility)
+![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/abilists/email_utility)
 
-[![Build Status](https://travis-ci.org/minziappa/utility.svg?branch=master)](https://travis-ci.org/minziappa/utility.svg)
-
-
-[Utility][1] is a collection for helping to develop a project.  
-It is based on [Java7][2] version, It uses some common libraries.
+**email_utility** is to communicate with other API service in Server Side. 
 
 Utility_sample is:
 
