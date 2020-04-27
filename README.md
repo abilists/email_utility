@@ -49,12 +49,9 @@ String basePath = servletContext.getRealPath("");
 
 StringBuffer sbBodyPath = new StringBuffer();
 sbBodyPath.append(basePath).append("/template/email");
-
 String body = TemplateUtility.mergeTemplate(sbBodyPath.toString(), "request.ftlh", tempModel);
-
 email.setMsg(body);
 email.setSubject("title");
-
 Emailer.sendEmail(email, "id", "password");
 ```
 
