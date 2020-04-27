@@ -3,46 +3,60 @@
 [![Build Status](https://travis-ci.org/abilists/email_utility.svg?branch=master)](https://travis-ci.org/abilists/email_utility)
 ![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/abilists/email_utility)
 
-**email_utility** is to communicate with other API service in Server Side. 
+**email_utility** is to send emails to you on Abilists. 
 
 Utility_sample is:
 
   * Free
   * Easy to use
 
-How to use
----------------------
+## About
+api_utility has a few special features:
 
+* Email: Send
+* EmailBean: 
+* Emailer: 
 
-Features
-------------- 
-   * Email: Send
-     * EmailBean: 
-     * Emailer: 
+## Runtime Requirements
 
-Build Requirements
-------------------
+- *P1:* Java8 or newer
+- *P2:* Junit test
 
-Eclipse 4.2 (or newer)
+## How to Install
+Build as blow
+```
+$ gradle install
+```
 
+## Get started
+Add the following code into the Model class.
+```
+EmailBean email = new EmailBean();
+email.setSmtpHost("smtp.gmail.com");
+email.setSmtpPort("587");
+email.setTo("abilists@gmail.com");
+email.setSmtpSender("heyguybug@gmail.com");
+email.setSmtpAuthEnable("true");
+email.setSmtpStarttlsEnable("true");
 
-Runtime Requirements
---------------------
-  * Java8 or newer
+RequestTemplateModel tempModel = new RequestTemplateModel();
+tempModel.setReqEmailAddress(requestPara.getEmailAddress());
+tempModel.setReqName(requestPara.getName());
+tempModel.setReqContents(requestPara.getContents());
 
-Running Tests
---------------------
+// Get the real path on Tomcat.
+String basePath = servletContext.getRealPath("");
 
-1. Junit test
+StringBuffer sbBodyPath = new StringBuffer();
+sbBodyPath.append(basePath).append("/template/email");
 
-Forum
------
-  * [My blog][3]
+String body = TemplateUtility.mergeTemplate(sbBodyPath.toString(), "request.ftlh", tempModel);
 
-Download from Github
---------------------
-    $ git clone https://github.com/minziappa/utility.git
+email.setMsg(body);
+email.setSubject("title");
 
-[1]: https://github.com/minziappa/utility "Utility"
-[2]: http://www.oracle.com/technetwork/java/javase/downloads/jdk7-downloads-1880260.html "Java7"
-[3]: http://njoonk.blogspot.jp/ "My blog"
+Emailer.sendEmail(email, "id", "password");
+```
+
+## License
+security_utility is distributed under the MIT License.
