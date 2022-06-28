@@ -19,15 +19,29 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 
+/**
+ * From Source : https://github.com/abilists/email_utility
+ * @author Joon
+ *
+ */
 public class Emailer {
 
+	public static String DEFAULT_PROTOCAL = "TLSv1.2";
+
 	public static void sendEmail(EmailBean email, final String userName, final String password) {
+		Emailer.sendEmail(email, userName, password, null);
+	}
+
+	public static void sendEmail(EmailBean email, final String userName, final String password, String protocols) {
 
 		Properties properties = new Properties();
 		properties.put("mail.smtp.auth", email.getSmtpAuthEnable());
 		properties.put("mail.smtp.starttls.enable", email.getSmtpStarttlsEnable());
 		properties.put("mail.smtp.host", email.getSmtpHost());
 		properties.put("mail.smtp.port", email.getSmtpPort());
+		if(protocols != null) {
+			properties.put("mail.smtp.ssl.protocols", protocols);
+		}
 
 		Session session = Session.getInstance(properties, 
 			new Authenticator() {
