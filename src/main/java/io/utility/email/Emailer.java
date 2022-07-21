@@ -2,6 +2,7 @@ package io.utility.email;
 
 import java.io.File;
 import java.util.Properties;
+import java.util.regex.Pattern;
 
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
@@ -26,13 +27,17 @@ import javax.mail.internet.MimeMultipart;
  */
 public class Emailer {
 
+	public static String EMIL_REGEX = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
+
 	public static String DEFAULT_PROTOCAL = "TLSv1.2";
 
+	public static String DEFAULT_CONTENTS_HTML = "text/html; charset=utf-8";
+
 	public static void sendEmail(EmailBean email, final String userName, final String password) {
-		Emailer.sendEmail(email, userName, password, null);
+		Emailer.sendEmail(email, userName, password, Emailer.DEFAULT_CONTENTS_HTML, null);
 	}
 
-	public static void sendEmail(EmailBean email, final String userName, final String password, String protocols) {
+	public static void sendEmail(EmailBean email, final String userName, final String password, String strHtml, String protocols) {
 
 		Properties properties = new Properties();
 		properties.put("mail.smtp.auth", email.getSmtpAuthEnable());
@@ -51,7 +56,8 @@ public class Emailer {
 			});
 
 		try {
-			Message message = new MimeMessage(session);
+			MimeMessage message = new MimeMessage(session);
+			message.setHeader("Content-Type", DEFAULT_CONTENTS_HTML);
 			message.setFrom(new InternetAddress(email.getSmtpSender())); // From email
 			message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(email.getTo()));
 			message.setSubject(email.getSubject());
@@ -71,11 +77,25 @@ public class Emailer {
 	     		multiPart.addBodyPart(part2);
 	     	}
 
-	     	message.setContent(multiPart);
+	     	// Set text or html
+	     	if(!strHtml.isEmpty()) {
+	     		message.setContent(multiPart, strHtml);	
+	     	} else {
+	     		message.setContent(multiPart);	
+	     	}
+
 	     	Transport.send(message);
 		} catch (MessagingException e) {
 			throw new RuntimeException(e);
 		}
 	}
+
+	public static boolean isValid(String email) {
+
+        Pattern pat = Pattern.compile(EMIL_REGEX);
+        if (email == null)
+            return false;
+        return pat.matcher(email).matches();
+    }
 
 }
