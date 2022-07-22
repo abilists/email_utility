@@ -1,6 +1,8 @@
 package io.utility.email;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
@@ -19,6 +21,7 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
+import javax.mail.internet.MimeUtility;
 
 /**
  * From Source : https://github.com/abilists/email_utility
@@ -31,13 +34,15 @@ public class Emailer {
 
 	public static String DEFAULT_PROTOCAL = "TLSv1.2";
 
+	public static String DEFAULT_CONTENTS_TEXT = "utf-8";
+
 	public static String DEFAULT_CONTENTS_HTML = "text/html; charset=utf-8";
 
-	public static void sendEmail(EmailBean email, final String userName, final String password) {
+	public static void sendEmail(EmailBean email, final String userName, final String password) throws IOException {
 		Emailer.sendEmail(email, userName, password, Emailer.DEFAULT_CONTENTS_HTML, null);
 	}
 
-	public static void sendEmail(EmailBean email, final String userName, final String password, String strHtml, String protocols) {
+	public static void sendEmail(EmailBean email, final String userName, final String password, String strHtml, String protocols) throws IOException {
 
 		Properties properties = new Properties();
 		properties.put("mail.smtp.auth", email.getSmtpAuthEnable());
@@ -60,38 +65,45 @@ public class Emailer {
 			message.setHeader("Content-Type", DEFAULT_CONTENTS_HTML);
 			message.setFrom(new InternetAddress(email.getSmtpSender())); // From email
 			message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(email.getTo()));
-			message.setSubject(email.getSubject());
+			message.setSubject(MimeUtility.encodeText(email.getSubject(), "utf-8", "B"));
 
-			BodyPart part1=new MimeBodyPart();
-			part1.setText(email.getMsg());
-	
-			Multipart multiPart=new MimeMultipart();
-			multiPart.addBodyPart(part1);
+			// TEXT
+		    MimeBodyPart textPart = new MimeBodyPart();
+		    textPart.setText(email.getMsg(), DEFAULT_CONTENTS_TEXT);
+		    // HTML
+		    MimeBodyPart htmlPart = new MimeBodyPart();
+		    htmlPart.setContent(email.getMsg(), DEFAULT_CONTENTS_HTML);
+		    // Set text, html
+			Multipart multiPart=new MimeMultipart("alternative");
+			multiPart.addBodyPart(textPart);
+			multiPart.addBodyPart(htmlPart);
+
 	     	// Attache file
 	     	if(email.getFilePath() != null) {
 	     		File file=new File(email.getFilePath());
-	     		BodyPart part2=new MimeBodyPart();
+	     		BodyPart filePart=new MimeBodyPart();
 	     		DataSource attachment=new FileDataSource(file);
-	     		part2.setDataHandler(new DataHandler(attachment));
-	     		part2.setFileName(file.getName());
-	     		multiPart.addBodyPart(part2);
+	     		filePart.setDataHandler(new DataHandler(attachment));
+	     		filePart.setFileName(file.getName());
+	     		multiPart.addBodyPart(filePart);
 	     	}
 
 	     	// Set text or html
 	     	if(!strHtml.isEmpty()) {
-	     		message.setContent(multiPart, strHtml);	
+	     		message.setContent(multiPart, strHtml);
 	     	} else {
 	     		message.setContent(multiPart);	
 	     	}
 
 	     	Transport.send(message);
+		} catch (UnsupportedEncodingException ue) {
+			throw new IOException(ue);
 		} catch (MessagingException e) {
 			throw new RuntimeException(e);
 		}
 	}
 
 	public static boolean isValid(String email) {
-
         Pattern pat = Pattern.compile(EMIL_REGEX);
         if (email == null)
             return false;

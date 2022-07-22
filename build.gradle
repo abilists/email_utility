@@ -5,7 +5,7 @@ apply plugin: 'maven'
 sourceCompatibility = '1.8'
 targetCompatibility = '1.8'
 
-version = '0.0.5'
+version = '0.0.7'
 
 buildscript {
 	repositories { 
@@ -39,7 +39,6 @@ dependencies {
 	compile 'ch.qos.logback:logback-core:' + logbackVersion
 	compile 'ch.qos.logback:logback-classic:' + logbackVersion
 	compile 'org.bouncycastle:bcprov-jdk16:1.46'
-	// compile 'javax.mail:mail:1.5.0-b01'
 	compile 'javax.mail:javax.mail-api:1.6.2'
 	testCompile "junit:junit:4.+"
 }
