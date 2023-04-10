@@ -1,0 +1,61 @@
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'maven'
+
+sourceCompatibility = '1.8'
+targetCompatibility = '1.8'
+
+version = '0.0.7'
+
+buildscript {
+	repositories { 
+		mavenCentral()
+		maven {
+        	url "https://plugins.gradle.org/m2/"
+		}
+	}
+}
+
+archivesBaseName = 'email-utility'
+
+jar {
+    manifest {
+        attributes 'Implementation-Title': 'email-utility', 'Implementation-Version': version
+    }
+}
+
+repositories {
+	mavenCentral()
+	mavenLocal()
+}
+
+ext {
+	logbackVersion = '1.2.9'
+}
+
+dependencies {
+	compile 'org.slf4j:slf4j-api:1.7.12'
+	runtime 'org.slf4j:jcl-over-slf4j:1.7.12'
+	compile 'ch.qos.logback:logback-core:' + logbackVersion
+	compile 'ch.qos.logback:logback-classic:' + logbackVersion
+	compile 'org.bouncycastle:bcprov-jdk16:1.46'
+	compile 'javax.mail:javax.mail-api:1.6.2'
+	testCompile "junit:junit:4.+"
+}
+
+// $ gradle install
+configure(install.repositories.mavenInstaller) {
+    pom.project {
+		group = 'io.utility'
+		artifactId 'email'
+        inceptionYear '2017'
+        packaging 'jar'
+        licenses {
+            license {
+                name 'Eclipse Public License (Version 1.0)'
+                url 'http://www.eclipse.org/legal/epl-v10.html'
+                distribution 'repo'
+            }
+        }
+    }
+}
