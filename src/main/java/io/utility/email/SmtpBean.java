@@ -9,6 +9,7 @@ public class SmtpBean {
 	private String smtpPort;
 	private String smtpSender;
 	private String smtpPassword;
+	private String timeSleep;
 
 	public String getSmtpHost() {
 		return smtpHost;
@@ -51,6 +52,12 @@ public class SmtpBean {
 	}
 	public void setSmtpPassword(String smtpPassword) {
 		this.smtpPassword = smtpPassword;
+	}
+	public String getTimeSleep() {
+		return timeSleep;
+	}
+	public void setTimeSleep(String timeSleep) {
+		this.timeSleep = timeSleep;
 	}
 
 }
