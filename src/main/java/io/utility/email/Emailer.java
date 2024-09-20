@@ -64,8 +64,12 @@ public class Emailer {
 			MimeMessage message = new MimeMessage(session);
 			message.setHeader("Content-Type", DEFAULT_CONTENTS_HTML);
 			message.setFrom(new InternetAddress(email.getSmtpSender())); // From email
-			message.setReplyTo(InternetAddress.parse(email.getReplyTo()));
-			message.setRecipients(Message.RecipientType.CC, InternetAddress.parse(email.getCc()));
+			if (email.getReplyTo() != null && !email.getReplyTo().isEmpty()){
+				message.setReplyTo(InternetAddress.parse(email.getReplyTo()));
+			}
+			if (email.getCc() != null && !email.getCc().isEmpty()){
+				message.setRecipients(Message.RecipientType.CC, InternetAddress.parse(email.getCc()));
+			}
 			message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(email.getTo()));
 			message.setSubject(MimeUtility.encodeText(email.getSubject(), "utf-8", "B"));
 
