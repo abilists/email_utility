@@ -1,5 +1,8 @@
 package io.utility.email;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -21,9 +24,11 @@ public class EmailerTest {
 	@Test
 	public void testOne() throws Exception {
 
+		List<String> recipients = Arrays.asList("njoonk@daum.net");
+
 		try {
 			EmailBean email = new EmailBean();
-			email.setTo("njoonk@daum.net");
+			email.setToList(recipients);
 			email.setSmtpSender("heyguybug@gmail.com");
 
 			StringBuffer sb = new StringBuffer();
