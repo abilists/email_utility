@@ -38,17 +38,19 @@ public class Emailer {
 
 	public static String DEFAULT_CONTENTS_HTML = "text/html; charset=utf-8";
 
-	public static void sendEmail(EmailBean email, final String userName, final String password) throws IOException {
-		Emailer.sendEmail(email, userName, password, Emailer.DEFAULT_CONTENTS_HTML, null);
+	public static String SMTP = "smtp";
+
+	public static void sendEmail(EmailBean emailBean, final String userName, final String password) throws IOException {
+		Emailer.sendEmail(emailBean, userName, password, Emailer.DEFAULT_CONTENTS_HTML, null);
 	}
 
-	public static void sendEmail(EmailBean email, final String userName, final String password, String strHtml, String protocols) throws IOException {
+	public static void sendEmail(EmailBean emailBean, final String userName, final String password, String strHtml, String protocols) throws IOException {
 
 		Properties properties = new Properties();
-		properties.put("mail.smtp.auth", email.getSmtpAuthEnable());
-		properties.put("mail.smtp.starttls.enable", email.getSmtpStarttlsEnable());
-		properties.put("mail.smtp.host", email.getSmtpHost());
-		properties.put("mail.smtp.port", email.getSmtpPort());
+		properties.put("mail.smtp.auth", emailBean.getSmtpAuthEnable());
+		properties.put("mail.smtp.starttls.enable", emailBean.getSmtpStarttlsEnable());
+		properties.put("mail.smtp.host", emailBean.getSmtpHost());
+		properties.put("mail.smtp.port", emailBean.getSmtpPort());
 		if(protocols != null) {
 			properties.put("mail.smtp.ssl.protocols", protocols);
 		}
@@ -60,48 +62,57 @@ public class Emailer {
 				}
 			});
 
-		try {
-			MimeMessage message = new MimeMessage(session);
-			message.setHeader("Content-Type", DEFAULT_CONTENTS_HTML);
-			message.setFrom(new InternetAddress(email.getSmtpSender())); // From email
-			if (email.getReplyTo() != null && !email.getReplyTo().isEmpty()){
-				message.setReplyTo(InternetAddress.parse(email.getReplyTo()));
-			}
-			if (email.getCc() != null && !email.getCc().isEmpty()){
-				message.setRecipients(Message.RecipientType.CC, InternetAddress.parse(email.getCc()));
-			}
-			message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(email.getTo()));
-			message.setSubject(MimeUtility.encodeText(email.getSubject(), "utf-8", "B"));
+		try (Transport transport = session.getTransport(SMTP)){
 
-			// TEXT
-		    MimeBodyPart textPart = new MimeBodyPart();
-		    textPart.setText(email.getMsg(), DEFAULT_CONTENTS_TEXT);
-		    // HTML
-		    MimeBodyPart htmlPart = new MimeBodyPart();
-		    htmlPart.setContent(email.getMsg(), DEFAULT_CONTENTS_HTML);
-		    // Set text, html
-			Multipart multiPart=new MimeMultipart("alternative");
-			multiPart.addBodyPart(textPart);
-			multiPart.addBodyPart(htmlPart);
+            System.out.println("SMTP connection start...");
+            transport.connect(emailBean.getSmtpHost(), userName, password);
+            System.out.println("SMTP connection successful!");
 
-	     	// Attache file
-	     	if(email.getFilePath() != null) {
-	     		File file=new File(email.getFilePath());
-	     		BodyPart filePart=new MimeBodyPart();
-	     		DataSource attachment=new FileDataSource(file);
-	     		filePart.setDataHandler(new DataHandler(attachment));
-	     		filePart.setFileName(file.getName());
-	     		multiPart.addBodyPart(filePart);
-	     	}
+            for (String to : emailBean.getToList()) {
+    			MimeMessage message = new MimeMessage(session);
+    			message.setHeader("Content-Type", DEFAULT_CONTENTS_HTML);
+    			message.setFrom(new InternetAddress(emailBean.getSmtpSender())); // From email
+    			if (emailBean.getReplyTo() != null && !emailBean.getReplyTo().isEmpty()){
+    				message.setReplyTo(InternetAddress.parse(emailBean.getReplyTo()));
+    			}
+    			if (emailBean.getCc() != null && !emailBean.getCc().isEmpty()){
+    				message.setRecipients(Message.RecipientType.CC, InternetAddress.parse(emailBean.getCc()));
+    			}
+    			message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(to));
+    			message.setSubject(MimeUtility.encodeText(emailBean.getSubject(), "utf-8", "B"));
 
-	     	// Set text or html
-	     	if(!strHtml.isEmpty()) {
-	     		message.setContent(multiPart, strHtml);
-	     	} else {
-	     		message.setContent(multiPart);	
-	     	}
+    			// TEXT
+    		    MimeBodyPart textPart = new MimeBodyPart();
+    		    textPart.setText(emailBean.getMsg(), DEFAULT_CONTENTS_TEXT);
+    		    // HTML
+    		    MimeBodyPart htmlPart = new MimeBodyPart();
+    		    htmlPart.setContent(emailBean.getMsg(), DEFAULT_CONTENTS_HTML);
+    		    // Set text, html
+    			Multipart multiPart=new MimeMultipart("alternative");
+    			multiPart.addBodyPart(textPart);
+    			multiPart.addBodyPart(htmlPart);
 
-	     	Transport.send(message);
+    	     	// Attache file
+    	     	if(emailBean.getFilePath() != null) {
+    	     		File file=new File(emailBean.getFilePath());
+    	     		BodyPart filePart=new MimeBodyPart();
+    	     		DataSource attachment=new FileDataSource(file);
+    	     		filePart.setDataHandler(new DataHandler(attachment));
+    	     		filePart.setFileName(file.getName());
+    	     		multiPart.addBodyPart(filePart);
+    	     	}
+
+    	     	// Set text or html
+    	     	if(!strHtml.isEmpty()) {
+    	     		message.setContent(multiPart, strHtml);
+    	     	} else {
+    	     		message.setContent(multiPart);
+    	     	}
+
+    	     	transport.sendMessage(message, message.getAllRecipients());
+            }
+
+            // Automatically, call the transport.close
 		} catch (UnsupportedEncodingException ue) {
 			throw new IOException(ue);
 		} catch (MessagingException e) {

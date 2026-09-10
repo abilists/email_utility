@@ -1,20 +1,16 @@
 package io.utility.email;
 
+import java.util.List;
+
 public class EmailBean extends SmtpBean {
 
-	private String to;
 	private String subject; 
 	private String msg;
 	private String filePath;
 	private String replyTo;
 	private String cc;
+	private List<String> toList;
 
-	public String getTo() {
-		return to;
-	}
-	public void setTo(String to) {
-		this.to = to;
-	}
 	public String getSubject() {
 		return subject;
 	}
@@ -44,6 +40,12 @@ public class EmailBean extends SmtpBean {
 	}
 	public void setCc(String cc) {
 		this.cc = cc;
+	}
+	public List<String> getToList() {
+		return toList;
+	}
+	public void setToList(List<String> toList) {
+		this.toList = toList;
 	}
 
 }
